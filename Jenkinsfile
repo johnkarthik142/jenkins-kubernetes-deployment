@@ -1,11 +1,10 @@
 pipeline {
 
-  environment {
-    dockerimagename = "johnkarthik142/react-app"
-    dockerImage = ""
-  }
-
   agent any
+
+	environment {
+		DOCKERHUB_CREDENTIALS=credentials('dockerhub-credential')
+	}
 
   stages {
 
@@ -15,26 +14,33 @@ pipeline {
       }
     }
 
-    stage('Build image') {
-      steps{
-        script {
-          dockerImage = docker.build dockerimagename
-        }
-      }
-    }
+    stage('Build') {
 
-    stage('Pushing Image') {
-      environment {
-               registryCredential = 'dockerhub-credential'
-           }
-      steps{
-        script {
-          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-            dockerImage.push("latest")
-          }
-        }
-      }
-    }
+			steps {
+				sh 'sudo docker build -t johnkarthik142/react-app .'
+			}
+		}
+
+		stage('Login') {
+
+			steps {
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			}
+		}
+
+		stage('Push') {
+
+			steps {
+				sh 'docker push johnkarthik142/react-app'
+			}
+		}
+	}
+
+	post {
+		always {
+			sh 'docker logout'
+		}
+	}
 
     stage('Deploying App to Kubernetes') {
       steps {
