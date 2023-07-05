@@ -17,7 +17,7 @@ pipeline {
     stage('Build') {
 
 			steps {
-				sh 'sudo docker build -t johnkarthik142/react-app .'
+				sh 'docker build -t johnkarthik142/react-app .'
 			}
 		}
 
