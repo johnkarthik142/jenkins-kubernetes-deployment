@@ -34,21 +34,15 @@ pipeline {
 				sh 'docker push johnkarthik142/react-app'
 			}
 		}
+	        stage('Deploying App to Kubernetes') {
+                          steps {
+                           script {
+                                 kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
+                                  }
+                             }
+                      }
+	  
 	}
-
-	post {
-		always {
-			sh 'docker logout'
-		}
-	}
-
-    stage('Deploying App to Kubernetes') {
-      steps {
-        script {
-          kubernetesDeploy(configs: "deployment.yaml", "service.yaml")
-        }
-      }
-    }
 
   }
 
